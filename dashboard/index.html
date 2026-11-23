@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — radar-4</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Token Radar <span class="tag">radar-4</span></h1>
+    <p class="lede">Which pre-token protocols would be worth the most if they launched a token — fitted from the 119 tokens that already trade, not from a list of names.</p>
+  </div>
+  <p class="asof" id="asof"></p>
+</header>
+
+<section class="kpis" id="kpis" aria-label="Key numbers"></section>
+
+<nav class="tabs" aria-label="Views">
+  <button data-tab="board" class="active">Board</button>
+  <button data-tab="live">Live tokens</button>
+  <button data-tab="method">Method &amp; checks</button>
+</nav>
+
+<section id="tab-board" class="tabpage">
+  <div class="controls">
+    <label>Search <input id="q" type="search" placeholder="name or slug"></label>
+    <label>Verdict
+      <select id="verdict">
+        <option value="">All verdicts</option>
+        <option>Strong</option>
+        <option>Watch</option>
+        <option>Weak</option>
+      </select>
+    </label>
+    <label>Category <select id="category"><option value="">All categories</option></select></label>
+    <label class="check"><input id="watchonly" type="checkbox"> Watchlist only</label>
+    <span id="count" class="count"></span>
+  </div>
+  <table id="board">
+    <thead>
+      <tr>
+        <th data-sort="rank">#</th>
+        <th data-sort="name">Protocol</th>
+        <th data-sort="category">Category</th>
+        <th data-sort="tvl_usd">TVL</th>
+        <th data-sort="implied_value_usd">Implied value</th>
+        <th>80% range</th>
+        <th data-sort="token_odds">Token odds</th>
+        <th data-sort="verdict">Verdict</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p class="note">Implied value = TVL × fitted multiple. The range is the calibrated 80% interval from leave-one-out residuals — wide on purpose: the median live multiple is typically missed by a factor of three, and this board says so instead of hiding it.</p>
+</section>
+
+<section id="tab-live" class="tabpage hidden">
+  <p class="lede">These protocols already have a token that trades. They are <strong>not</strong> on the board — they are the comparables the model is fitted from. Separating them from the pre-token board is the point: a launch radar ranks what has not launched yet.</p>
+  <table id="livetable">
+    <thead><tr><th>Protocol</th><th>Category</th><th>TVL</th><th>Market cap</th><th>Multiple</th></tr></thead>
+    <tbody id="liverows"></tbody>
+  </table>
+  <p class="note" id="livecount"></p>
+</section>
+
+<section id="tab-method" class="tabpage hidden">
+  <h2>How the number is made</h2>
+  <p>For each live token, multiple = market cap ÷ TVL. radar-4 fits log(multiple) by ridge regression on log TVL, seven-day TVL change, log age and category, with a separate shrinkage penalty per group. The fitted weights are printed below — they come from the snapshot, and the two near-zero ones are the honest result: once size is accounted for, seven-day growth and age barely move the multiple.</p>
+  <div id="formula" class="formula"></div>
+  <h2>Checks, run by the program on the same snapshot</h2>
+  <table id="validtable">
+    <thead><tr><th>Check</th><th>radar-4</th><th>Kernel-median baseline</th></tr></thead>
+    <tbody id="validrows"></tbody>
+  </table>
+  <p class="note">Leave-one-out refits the model 119 times, each time holding out one live token and predicting it. Walk-forward trains only on tokens listed before a cutoff date and tests on tokens listed after it — the closest thing to predicting the future this snapshot allows. The baseline is a TVL-distance weighted median multiple. radar-4 beats it on both, and the gap is widest walk-forward, where the old growth and maturity multipliers hurt most.</p>
+  <h2>What this board does not claim</h2>
+  <ul class="limits">
+    <li>It does not predict whether or when a protocol issues a token. “Pre-token” means the snapshot records no token, never that the protocol has none.</li>
+    <li>The median miss is large: half of all live multiples are missed by a factor of about three. Use the range and the verdict, not the point number alone.</li>
+    <li>Wrapped, staked, bridged and versioned products are left out on purpose, as are exchanges — they are not launch candidates.</li>
+  </ul>
+</section>
+
+<aside id="drawer" class="drawer hidden" aria-label="Protocol detail">
+  <button id="close" class="close">Close</button>
+  <div id="detail"></div>
+</aside>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
